@@ -43,13 +43,21 @@ def host_ip(ip):
 
 @app.route('/location/<string:ip>')
 def location(ip):
-    get_location_str = wry.lookup(ip)
-    if get_location_str is None:
-        return jsonify({'result': False})
-    else:
-        get_country = get_location_str[0]
-        get_city = get_location_str[1]
-        return jsonify({'result': True, 'country': get_country, 'city': get_city})
+    wry = QQwry()
+    ip_data_path = os.path.join(os.getcwd(), 'ip_data\\qqwry.dat')
+    if os.path.exists(ip_data_path):
+        if wry.is_loaded():
+            get_location_str = wry.lookup(ip)
+        else:
+            # 如果没有加载数据，首先加载
+            wry.load_file(ip_data_path, loadindex=True)
+            get_location_str = wry.lookup(ip)
+        if get_location_str is None:
+            return jsonify({'result': False})
+        else:
+            get_country = get_location_str[0]
+            get_city = get_location_str[1]
+            return jsonify({'result': True, 'country': get_country, 'city': get_city})
 
 
 if __name__ == '__main__':
